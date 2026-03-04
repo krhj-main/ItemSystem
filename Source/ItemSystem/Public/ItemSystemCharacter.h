@@ -11,6 +11,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UInventoryComponent;
 
 
 UCLASS()
@@ -60,6 +61,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* InteractAction;
+
+
+	//==================
+	//inventory
+	//==================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UInventoryComponent* InventoryComponent;
+
+	//==================
+	//interact	
+	//==================
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interacttion")
+	float InteractionRange = 300.0f;
 
 	//=========
 	//input functions

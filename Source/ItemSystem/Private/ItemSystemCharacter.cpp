@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InventoryComponent.h"
+#include "InteractInterface.h"
 
 // Sets default values
 AItemSystemCharacter::AItemSystemCharacter()
@@ -41,6 +43,9 @@ AItemSystemCharacter::AItemSystemCharacter()
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
+
+	//인벤토리 컴포넌트 생성
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
 
 }
@@ -146,6 +151,51 @@ void AItemSystemCharacter::Look(const FInputActionValue& Value)
 //==================================================================
 void AItemSystemCharacter::StartInteract()
 {
-	//나중에 라인트레이스로 전방 아이템 감지 후 줍는 로직 추가예정
-	UE_LOG(LogTemp, Warning, TEXT("Interact Pressed!"));
+	if (!Camera) return;
+
+	//linetrace Start : camera location
+	FVector TraceStart = Camera->GetComponentLocation();
+	// end : camera forward vector * interaction range
+	FVector TraceEnd = TraceStart + (Camera->GetForwardVector() * InteractionRange);
+
+	//hit result
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this); //자기 자신은 충돌에서 제외
+
+	//linetrace start
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		TraceStart,
+		TraceEnd,
+		ECC_Visibility,  // Visibility 채널로 검사
+		Params
+	);
+
+	if (bHit && HitResult.GetActor())
+	{
+		AActor* HitActor = HitResult.GetActor();
+
+		//맞은 액터가 interactinterface를 구현한 액터인지 확인
+		if (HitActor->Implements<UInteractInterface>())
+		{
+			//인터페이스의 인터랙트 함수 호출
+			IInteractInterface::Execute_Interact(HitActor, this);
+
+			UE_LOG(LogTemp, Warning, TEXT("Interacted with: %s"), *HitActor->GetName());
+
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Hit %s but not interactable"), *HitActor->GetName());
+		}
+
+		// 여기에 아이템 줍기 로직이 들어갈 예정
+		// 다음 단계에서 BP_ItemPickup과 연결합니다
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Nothing in range"));
+	}
+
 }
