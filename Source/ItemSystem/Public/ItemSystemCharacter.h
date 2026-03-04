@@ -12,6 +12,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UInventoryComponent;
+class UStatusComponent;
 
 
 UCLASS()
@@ -62,6 +63,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* InteractAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* InventoryAction;
+
 
 	//==================
 	//inventory
@@ -70,10 +74,38 @@ public:
 	UInventoryComponent* InventoryComponent;
 
 	//==================
+	//UI
+	//==================
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	bool bIsInventoryOpen = false;
+
+	//==================
 	//interact	
 	//==================
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interacttion")
 	float InteractionRange = 300.0f;
+
+	//==================
+	//interact ui
+	//==================
+	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
+	AActor* CurrentInteractTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
+	FText CurrentInteractName;
+
+
+	//==================
+	// status health stamina
+	//==================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status")
+	UStatusComponent* StatusComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status")
+	UInputAction* SprintAction;
+
+
+
 
 	//=========
 	//input functions
@@ -81,6 +113,15 @@ public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void StartInteract();
+	void ToggleInventory();
+
+
+	//interact ui
+	void CheckForInteractable();
+
+	//sprint
+	void StartSprint();
+	void StopSprint();
 
 
 

@@ -10,12 +10,13 @@
 #include "EnhancedInputSubsystems.h"
 #include "InventoryComponent.h"
 #include "InteractInterface.h"
+#include "StatusComponent.h"
 
 // Sets default values
 AItemSystemCharacter::AItemSystemCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	//springarm 생성 및 설정
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SprinArm"));
@@ -47,6 +48,9 @@ AItemSystemCharacter::AItemSystemCharacter()
 	//인벤토리 컴포넌트 생성
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
+	//상태 컴포넌트 생성
+	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
+
 
 }
 
@@ -73,6 +77,8 @@ void AItemSystemCharacter::BeginPlay()
 void AItemSystemCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	CheckForInteractable();
 
 }
 
@@ -110,6 +116,20 @@ void AItemSystemCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		{
 			EnhancedInput->BindAction(InteractAction, ETriggerEvent::Started, this, &AItemSystemCharacter::StartInteract);
 		}
+
+
+		// sprint : left shift
+		if(SprintAction)
+		 {
+			 EnhancedInput->BindAction(SprintAction, ETriggerEvent::Started, this, &AItemSystemCharacter::StartSprint);
+			 EnhancedInput->BindAction(SprintAction, ETriggerEvent::Completed, this, &AItemSystemCharacter::StopSprint);
+		}
+
+		//inventory : tab
+		 if(InventoryAction)
+		 {
+			 EnhancedInput->BindAction(InventoryAction, ETriggerEvent::Started, this, &AItemSystemCharacter::ToggleInventory);
+		 }
 	}
 
 }
@@ -198,4 +218,86 @@ void AItemSystemCharacter::StartInteract()
 		UE_LOG(LogTemp, Log, TEXT("Nothing in range"));
 	}
 
+}
+
+void AItemSystemCharacter::CheckForInteractable()
+{
+	if (!Camera) return;
+
+	FVector TraceStart = Camera->GetComponentLocation();
+	FVector TraceEnd = TraceStart + (Camera->GetForwardVector() * InteractionRange);
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		TraceStart,
+		TraceEnd,
+		ECC_Visibility,
+		Params
+	);
+
+	if (bHit && HitResult.GetActor() && HitResult.GetActor()->Implements<UInteractInterface>())
+	{
+		CurrentInteractTarget = HitResult.GetActor();
+
+		//BP_itempickup이면 이름을 가져옴
+		// 범용적으로 인터랙트 가능한 액터의 이름을 가져오도록 변경
+		CurrentInteractName = FText::FromString(
+			FString::Printf(TEXT("E  %s 줍기"), *CurrentInteractTarget->GetActorLabel()));
+	}
+	else
+	{
+		CurrentInteractTarget = nullptr;
+		CurrentInteractName = FText::GetEmpty();
+	}
+}
+
+//==================================================================
+//Sprint
+//==================================================================
+void AItemSystemCharacter::StartSprint()
+{
+	if (StatusComponent)
+	{
+		StatusComponent->StartSprint();
+	}
+}
+
+void AItemSystemCharacter::StopSprint()
+{
+	if (StatusComponent)
+	{
+		StatusComponent->StopSprint();
+	}
+}
+
+void AItemSystemCharacter::ToggleInventory()
+{
+	bIsInventoryOpen = !bIsInventoryOpen;
+	
+	if (APlayerController* PC = Cast<APlayerController>(Controller))
+	{
+		if (bIsInventoryOpen)
+		{
+			//마우스 커서 표시, UI입력전달
+			PC->SetShowMouseCursor(true);
+
+			FInputModeGameAndUI InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PC->SetInputMode(InputMode);
+		}
+		else
+		{
+			//마우스 커서 숨김, 게임 입력 전달
+			PC->SetShowMouseCursor(false);
+
+			FInputModeGameOnly InputMode;
+			PC->SetInputMode(InputMode);
+		}
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Inventory %s"), bIsInventoryOpen ? TEXT("Opened") : TEXT("Closed"));
 }
