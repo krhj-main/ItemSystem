@@ -11,6 +11,8 @@
 #include "InventoryComponent.h"
 #include "InteractInterface.h"
 #include "StatusComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 
 // Sets default values
 AItemSystemCharacter::AItemSystemCharacter()
@@ -53,6 +55,11 @@ AItemSystemCharacter::AItemSystemCharacter()
 
 	//태그추가 AI가 플레이어 인식용
 	Tags.Add(FName("Player"));
+
+	//AI가 캐릭터를 감지할수있게하는 컴포넌트 생성
+	//StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
+	//StimuliSource->RegisterForSense(TSubclassOf<UAISense>(UAISense_Sight::StaticClass()));
+	//StimuliSource->bAutoRegister = true;
 }
 
 // begin play에서 입력 시스템 설정

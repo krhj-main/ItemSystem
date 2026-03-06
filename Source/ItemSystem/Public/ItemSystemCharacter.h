@@ -13,6 +13,7 @@ class UInputMappingContext;
 class UInputAction;
 class UInventoryComponent;
 class UStatusComponent;
+class UAIPerceptionStimuliSourceComponent;
 
 
 UCLASS()
@@ -122,6 +123,10 @@ public:
 	//sprint
 	void StartSprint();
 	void StopSprint();
+
+	//AI가 캐릭터를 감지할수있게하는 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UAIPerceptionStimuliSourceComponent* StimuliSource;
 
 
 
