@@ -12,12 +12,27 @@ UBTTask_Attack::UBTTask_Attack()
 
 EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	
 	AAIController* AIController = OwnerComp.GetAIOwner();
-	if (!AIController) return EBTNodeResult::Failed;
+	UE_LOG(LogTemp, Warning, TEXT("Attack Task!"));
+	if (!AIController)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AIController NULL!"));
+		return EBTNodeResult::Failed;
+	}
 
-	AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(AIController->GetOwner());
-	if (!Enemy) return EBTNodeResult::Failed;
+	APawn* Pawn = AIController->GetPawn();
+	UE_LOG(LogTemp, Error, TEXT("Pawn class : %s"),
+		Pawn ? *Pawn->GetClass()->GetName() : TEXT("NULL"));
+
+	AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(Pawn);
+	if (!Enemy)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AEnemyCharacter Cast failed!"));
+		return EBTNodeResult::Failed;
+	}
 
 	Enemy->PerformAttack();
 	return EBTNodeResult::Succeeded;
+	
 }

@@ -4,6 +4,7 @@
 #include "EnemyCharacter.h"
 #include "StatusComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -14,6 +15,15 @@ AEnemyCharacter::AEnemyCharacter()
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 
 	GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
+
+	// 이동 방향으로 회전 (순찰 시)
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 480.0f, 0.0f);
+
+	// AI는 컨트롤러 회전을 사용 (SetFocus로 플레이어를 바라봄)
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
 
 }
 
@@ -26,26 +36,40 @@ void AEnemyCharacter::BeginPlay()
 
 void AEnemyCharacter::PerformAttack()
 {
-	if (!bCanAttack) return;
-	
-	bCanAttack = false;
+    UE_LOG(LogTemp, Error, TEXT("PerformAttack 호출됨, bCanAttack: %s"),
+        bCanAttack ? TEXT("TRUE") : TEXT("FALSE"));
 
-	TArray<AActor*> OverlappingActors;
-	GetOverlappingActors(OverlappingActors);
+    if (!bCanAttack) return;
 
-	for (AActor* Actor : OverlappingActors)
-	{
-		if (Actor != this && Actor->ActorHasTag("Player"))
-		{
-			if (UStatusComponent* TargetStatus = Actor->FindComponentByClass<UStatusComponent>())
-			{
-				TargetStatus->ApplyDamage(AttackDamage);
-				UE_LOG(LogTemp, Log, TEXT("적이 플레이어를 공격! 데미지: %.1f"), AttackDamage);
-			}
-		}
-	}
+    bCanAttack = false;
 
-	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &AEnemyCharacter::ResetAttack, AttackCooldown, false);
+    ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+
+    UE_LOG(LogTemp, Error, TEXT("PlayerCharacter: %s"),
+        PlayerCharacter ? TEXT("찾음") : TEXT("NULL"));
+
+    if (PlayerCharacter)
+    {
+        float Distance = FVector::Dist(GetActorLocation(), PlayerCharacter->GetActorLocation());
+        UE_LOG(LogTemp, Error, TEXT("플레이어와 거리: %.1f / 공격범위: %.1f"), Distance, AttackRange);
+
+        if (Distance <= AttackRange)
+        {
+            if (UStatusComponent* TargetStatus =
+                PlayerCharacter->FindComponentByClass<UStatusComponent>())
+            {
+                TargetStatus->ApplyDamage(AttackDamage);
+                UE_LOG(LogTemp, Warning, TEXT("공격 성공! 데미지: %.1f"), AttackDamage);
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("StatusComponent를 못 찾음!"));
+            }
+        }
+    }
+
+    GetWorldTimerManager().SetTimer(
+        AttackTimerHandle, this, &AEnemyCharacter::ResetAttack, AttackCooldown, false);
 }
 
 // Called every frame

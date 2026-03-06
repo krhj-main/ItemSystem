@@ -78,6 +78,8 @@ void AEnemyAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActor
 			{
 				DetectedPlayer = Actor;
 
+				SetFocus(Actor);
+
 				if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(GetPawn()))
 				{
 					Enemy->GetCharacterMovement()->MaxWalkSpeed = Enemy->ChaseSpeed;
@@ -87,6 +89,21 @@ void AEnemyAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActor
 				{
 					GetBlackboardComponent()->SetValueAsObject("TargetActor", Actor);
 					GetBlackboardComponent()->SetValueAsVector("LastKnownLocation",Actor->GetActorLocation());
+
+					// === 디버그 로그 추가 ===
+					UE_LOG(LogTemp, Error, TEXT("BB 키 개수: %d"),
+						GetBlackboardComponent()->GetNumKeys());
+
+					GetBlackboardComponent()->SetValueAsObject("TargetPlayer", Actor);
+
+					UObject* CheckValue = GetBlackboardComponent()->GetValueAsObject("TargetPlayer");
+					UE_LOG(LogTemp, Error, TEXT("저장 시도한 Actor: %s"), *Actor->GetName());
+					UE_LOG(LogTemp, Error, TEXT("BB에서 읽은 값: %s"),
+						CheckValue ? *CheckValue->GetName() : TEXT("NULL"));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("BlackboardComponent가 NULL!"));
 				}
 
 				UE_LOG(LogTemp,Warning,TEXT("플레이어 감지"));
@@ -94,6 +111,8 @@ void AEnemyAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActor
 			else
 			{
 				DetectedPlayer = nullptr;
+
+				ClearFocus(EAIFocusPriority::Gameplay);
 
 				if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(GetPawn()))
 				{

@@ -39,7 +39,7 @@ public:
 
     // 공격 사거리
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    float AttackRange = 150.0f;
+    float AttackRange = 200.0f;
 
     // 공격 쿨다운
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")

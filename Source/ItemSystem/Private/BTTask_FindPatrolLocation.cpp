@@ -13,6 +13,7 @@ UBTTask_FindPatrolLocation::UBTTask_FindPatrolLocation()
 
 EBTNodeResult::Type UBTTask_FindPatrolLocation::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Patrol Task"));
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController) return EBTNodeResult::Failed;
 
@@ -23,6 +24,7 @@ EBTNodeResult::Type UBTTask_FindPatrolLocation::ExecuteTask(UBehaviorTreeCompone
 	if (!NavSystem) return EBTNodeResult::Failed;
 
 	FNavLocation RandomLocation;
+	
 	bool bFound = NavSystem->GetRandomReachablePointInRadius(AIPawn->GetActorLocation(), PatrolRadius, RandomLocation);
 	if (bFound)
 	{
