@@ -7,6 +7,8 @@
 #include "Perception/AISenseConfig_Hearing.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "EnemyCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AEnemyAIController::AEnemyAIController()
 {
@@ -76,6 +78,11 @@ void AEnemyAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActor
 			{
 				DetectedPlayer = Actor;
 
+				if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(GetPawn()))
+				{
+					Enemy->GetCharacterMovement()->MaxWalkSpeed = Enemy->ChaseSpeed;
+				}
+
 				if (GetBlackboardComponent())
 				{
 					GetBlackboardComponent()->SetValueAsObject("TargetActor", Actor);
@@ -87,6 +94,11 @@ void AEnemyAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActor
 			else
 			{
 				DetectedPlayer = nullptr;
+
+				if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(GetPawn()))
+				{
+					Enemy->GetCharacterMovement()->MaxWalkSpeed = Enemy->PatrolSpeed;
+				}
 
 				if (GetBlackboardComponent())
 				{
