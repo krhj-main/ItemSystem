@@ -56,4 +56,9 @@ public:
     // 인벤토리가 변할 때마다 발동 (나중에 UI 갱신에 사용)
     UPROPERTY(BlueprintAssignable, Category = "Inventory")
     FOnInventoryUpdated OnInventoryUpdated;
+
+
+    //아이템 사용
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+    bool UseItem(FName ItemID);
 };

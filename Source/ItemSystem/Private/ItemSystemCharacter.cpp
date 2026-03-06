@@ -51,7 +51,8 @@ AItemSystemCharacter::AItemSystemCharacter()
 	//상태 컴포넌트 생성
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 
-
+	//태그추가 AI가 플레이어 인식용
+	Tags.Add(FName("Player"));
 }
 
 // begin play에서 입력 시스템 설정

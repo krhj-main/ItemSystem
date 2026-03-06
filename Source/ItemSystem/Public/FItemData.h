@@ -36,4 +36,14 @@ struct FItemData
     // 현재 보유 수량
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
     int32 CurrentCount = 1;
+
+    //아이템 타입 용도 구분용
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	FName ItemType = "Misc"; 
+    // 예: "Key", "Ammo", "Health", "Misc"
+
+    //효과 수치 (회복아이템=>회복량)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+    float EffectValue = 0.0f;
+
 };

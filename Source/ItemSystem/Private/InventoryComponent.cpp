@@ -1,4 +1,5 @@
 #include "InventoryComponent.h"
+#include "StatusComponent.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -81,6 +82,39 @@ bool UInventoryComponent::FindItem(FName ItemID, FItemData& OutItem) const
         if (Item.ItemID == ItemID)
         {
             OutItem = Item;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool UInventoryComponent::UseItem(FName ItemID)
+{
+    for (int32 i = 0; i < Items.Num(); i++)
+    {
+        if (Items[i].ItemID == ItemID)
+        {
+            FItemData& Item = Items[i];
+
+            if (Item.ItemType == "Heal")
+            {
+                if (AActor* Owner = GetOwner())
+                {
+                    if (UStatusComponent* Status = Owner->FindComponentByClass<UStatusComponent>())
+                    {
+                        Status->Heal(Item.EffectValue);
+
+                        UE_LOG(LogTemp, Log, TEXT("아이템사용: %s (회복량: %.1f)"), *Item.ItemID.ToString(), Item.EffectValue);
+                    }
+                }
+            }
+
+            Item.CurrentCount--;
+            if (Item.CurrentCount<=0)
+            {
+                Items.RemoveAt(i);
+            }
+			OnInventoryUpdated.Broadcast();
             return true;
         }
     }
