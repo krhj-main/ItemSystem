@@ -14,7 +14,6 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "SaveLoadManager.h"
-#include "Blueprint/UserWidget.h"
 
 // Sets default values
 AItemSystemCharacter::AItemSystemCharacter()
@@ -161,6 +160,12 @@ void AItemSystemCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 			 EnhancedInput->BindAction(LoadAction,ETriggerEvent::Started,this,&AItemSystemCharacter::QuickLoad);
 		 }
 
+		 //flashlight
+		 if (FlashlightAction)
+		 {
+			 EnhancedInput->BindAction(FlashlightAction,ETriggerEvent::Started,this,&AItemSystemCharacter::ToggleFlashlight);
+		 }
+
 		 
 	}
 
@@ -278,7 +283,7 @@ void AItemSystemCharacter::CheckForInteractable()
 		//BP_itempickup이면 이름을 가져옴
 		// 범용적으로 인터랙트 가능한 액터의 이름을 가져오도록 변경
 		CurrentInteractName = FText::FromString(
-			FString::Printf(TEXT("E  %s 줍기"), *CurrentInteractTarget->GetActorLabel()));
+			FString::Printf(TEXT("E  %s 줍기"), *CurrentInteractTarget->GetName()));
 	}
 	else
 	{
@@ -358,4 +363,14 @@ void AItemSystemCharacter::OnPlayerDeath()
 		PC->SetInputMode(InputMode);
 	}
 	UE_LOG(LogTemp, Error, TEXT("플레이어 사망!"));
+}
+
+void AItemSystemCharacter::ToggleFlashlight()
+{
+	bFlashlightOn = !bFlashlightOn;
+
+	// BP에서 Flashlight 컴포넌트의 Visibility를 토글
+	// C++에서 SpotLight를 직접 제어하려면 컴포넌트를 헤더에 선언해야 하지만,
+	// BP에서 추가한 컴포넌트이므로 BP에서 처리하는 게 깔끔
+	UE_LOG(LogTemp, Log, TEXT("Flashlight: %s"), bFlashlightOn ? TEXT("ON") : TEXT("OFF"));
 }

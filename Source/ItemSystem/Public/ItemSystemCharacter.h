@@ -150,6 +150,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Status")
 	bool bIsDead = false;
 
+	//flashlight
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* FlashlightAction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Flashlight")
+	bool bFlashlightOn = true;
+
+	void ToggleFlashlight();
+
 	
 
 
