@@ -13,6 +13,8 @@
 #include "StatusComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
+#include "SaveLoadManager.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 AItemSystemCharacter::AItemSystemCharacter()
@@ -76,7 +78,18 @@ void AItemSystemCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+
+		PC->SetShowMouseCursor(false);
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		EnableInput(PC);
 	}
+	/*
+	if (StatusComponent)
+	{
+		StatusComponent->OnDeath.AddDynamic(this, &AItemSystemCharacter::OnPlayerDeath);
+	}
+	*/
 
 	
 }
@@ -138,6 +151,17 @@ void AItemSystemCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		 {
 			 EnhancedInput->BindAction(InventoryAction, ETriggerEvent::Started, this, &AItemSystemCharacter::ToggleInventory);
 		 }
+
+		 if (SaveAction)
+		 {
+			 EnhancedInput->BindAction(SaveAction,ETriggerEvent::Started, this, &AItemSystemCharacter::QuickSave);
+		 }
+		 if (LoadAction)
+		 {
+			 EnhancedInput->BindAction(LoadAction,ETriggerEvent::Started,this,&AItemSystemCharacter::QuickLoad);
+		 }
+
+		 
 	}
 
 }
@@ -308,4 +332,30 @@ void AItemSystemCharacter::ToggleInventory()
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("Inventory %s"), bIsInventoryOpen ? TEXT("Opened") : TEXT("Closed"));
+}
+
+
+void AItemSystemCharacter::QuickSave()
+{
+	USaveLoadManager::SaveGame(this,"QuickSave");
+}
+void AItemSystemCharacter::QuickLoad()
+{
+	USaveLoadManager::LoadGame(this, "QuickSave");
+}
+
+void AItemSystemCharacter::OnPlayerDeath()
+{
+	if (bIsDead) return;
+	bIsDead = true;
+
+	if (APlayerController* PC = Cast<APlayerController>(Controller))
+	{
+		DisableInput(PC);
+
+		PC->SetShowMouseCursor(true);
+		FInputModeUIOnly InputMode;
+		PC->SetInputMode(InputMode);
+	}
+	UE_LOG(LogTemp, Error, TEXT("플레이어 사망!"));
 }

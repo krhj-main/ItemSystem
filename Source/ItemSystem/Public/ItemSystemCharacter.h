@@ -67,6 +67,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* InventoryAction;
 
+	//==================
+	//save load 
+	//==================
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* SaveAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* LoadAction;
+
 
 	//==================
 	//inventory
@@ -105,6 +114,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Status")
 	UInputAction* SprintAction;
 
+	
+
 
 
 
@@ -127,6 +138,19 @@ public:
 	//AI가 캐릭터를 감지할수있게하는 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAIPerceptionStimuliSourceComponent* StimuliSource;
+
+	void QuickSave();
+	void QuickLoad();
+
+	// player death
+	UFUNCTION(BlueprintCallable, Category = "Status")
+	void OnPlayerDeath();
+
+	//gameover
+	UPROPERTY(BlueprintReadOnly, Category = "Status")
+	bool bIsDead = false;
+
+	
 
 
 
